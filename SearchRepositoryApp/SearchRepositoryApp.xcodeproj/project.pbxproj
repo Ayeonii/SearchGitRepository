@@ -20,6 +20,11 @@
 		CC87AB5F26AFF7BF001D8BFC /* BaseTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC87AB5E26AFF7BF001D8BFC /* BaseTabBarViewController.swift */; };
 		CC87AB6626AFF80F001D8BFC /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC87AB6426AFF80F001D8BFC /* SearchViewController.swift */; };
 		CC87AB6726AFF80F001D8BFC /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CC87AB6526AFF80F001D8BFC /* SearchViewController.xib */; };
+		CC87AB6926AFFA9F001D8BFC /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC87AB6826AFFA9F001D8BFC /* SearchViewModel.swift */; };
+		CC87AB7426B0084C001D8BFC /* SearchResultViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC87AB7226B0084C001D8BFC /* SearchResultViewController.swift */; };
+		CC87AB7526B0084C001D8BFC /* SearchResultViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CC87AB7326B0084C001D8BFC /* SearchResultViewController.xib */; };
+		CC87AB7726B0093A001D8BFC /* SearchResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC87AB7626B0093A001D8BFC /* SearchResultViewModel.swift */; };
+		CC87AB7926B00943001D8BFC /* SearchResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC87AB7826B00943001D8BFC /* SearchResultModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +68,11 @@
 		CC87AB5E26AFF7BF001D8BFC /* BaseTabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTabBarViewController.swift; sourceTree = "<group>"; };
 		CC87AB6426AFF80F001D8BFC /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		CC87AB6526AFF80F001D8BFC /* SearchViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
+		CC87AB6826AFFA9F001D8BFC /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
+		CC87AB7226B0084C001D8BFC /* SearchResultViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultViewController.swift; sourceTree = "<group>"; };
+		CC87AB7326B0084C001D8BFC /* SearchResultViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchResultViewController.xib; sourceTree = "<group>"; };
+		CC87AB7626B0093A001D8BFC /* SearchResultViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultViewModel.swift; sourceTree = "<group>"; };
+		CC87AB7826B00943001D8BFC /* SearchResultModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultModel.swift; sourceTree = "<group>"; };
 		E29E2FD651E3AD4D3125D56C /* Pods_SearchRepositoryApp_SearchRepositoryAppUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SearchRepositoryApp_SearchRepositoryAppUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E43D72D8DDDD5DBF5791DB21 /* Pods-SearchRepositoryApp-SearchRepositoryAppUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SearchRepositoryApp-SearchRepositoryAppUITests.debug.xcconfig"; path = "Target Support Files/Pods-SearchRepositoryApp-SearchRepositoryAppUITests/Pods-SearchRepositoryApp-SearchRepositoryAppUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -208,9 +218,8 @@
 		CC87AB6026AFF7CD001D8BFC /* SearchTab */ = {
 			isa = PBXGroup;
 			children = (
-				CC87AB6326AFF7E5001D8BFC /* Model */,
-				CC87AB6226AFF7DF001D8BFC /* ViewModel */,
-				CC87AB6126AFF7D8001D8BFC /* View */,
+				CC87AB6C26B00327001D8BFC /* SearchMain */,
+				CC87AB6D26B0032F001D8BFC /* SearchResult */,
 			);
 			path = SearchTab;
 			sourceTree = "<group>";
@@ -227,13 +236,51 @@
 		CC87AB6226AFF7DF001D8BFC /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				CC87AB6826AFFA9F001D8BFC /* SearchViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
 		};
-		CC87AB6326AFF7E5001D8BFC /* Model */ = {
+		CC87AB6C26B00327001D8BFC /* SearchMain */ = {
 			isa = PBXGroup;
 			children = (
+				CC87AB6226AFF7DF001D8BFC /* ViewModel */,
+				CC87AB6126AFF7D8001D8BFC /* View */,
+			);
+			path = SearchMain;
+			sourceTree = "<group>";
+		};
+		CC87AB6D26B0032F001D8BFC /* SearchResult */ = {
+			isa = PBXGroup;
+			children = (
+				CC87AB7126B0083B001D8BFC /* Model */,
+				CC87AB7026B00836001D8BFC /* ViewModel */,
+				CC87AB6F26B0082C001D8BFC /* View */,
+			);
+			path = SearchResult;
+			sourceTree = "<group>";
+		};
+		CC87AB6F26B0082C001D8BFC /* View */ = {
+			isa = PBXGroup;
+			children = (
+				CC87AB7226B0084C001D8BFC /* SearchResultViewController.swift */,
+				CC87AB7326B0084C001D8BFC /* SearchResultViewController.xib */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		CC87AB7026B00836001D8BFC /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				CC87AB7626B0093A001D8BFC /* SearchResultViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		CC87AB7126B0083B001D8BFC /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				CC87AB7826B00943001D8BFC /* SearchResultModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -346,6 +393,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC87AB7526B0084C001D8BFC /* SearchResultViewController.xib in Resources */,
 				CC87AB3726AFF615001D8BFC /* LaunchScreen.storyboard in Resources */,
 				CC87AB3426AFF615001D8BFC /* Assets.xcassets in Resources */,
 				CC87AB6726AFF80F001D8BFC /* SearchViewController.xib in Resources */,
@@ -477,9 +525,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC87AB7726B0093A001D8BFC /* SearchResultViewModel.swift in Sources */,
 				CC87AB2B26AFF614001D8BFC /* AppDelegate.swift in Sources */,
+				CC87AB6926AFFA9F001D8BFC /* SearchViewModel.swift in Sources */,
 				CC87AB2D26AFF614001D8BFC /* SceneDelegate.swift in Sources */,
+				CC87AB7926B00943001D8BFC /* SearchResultModel.swift in Sources */,
 				CC87AB6626AFF80F001D8BFC /* SearchViewController.swift in Sources */,
+				CC87AB7426B0084C001D8BFC /* SearchResultViewController.swift in Sources */,
 				CC87AB5F26AFF7BF001D8BFC /* BaseTabBarViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

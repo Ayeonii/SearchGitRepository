@@ -20,10 +20,12 @@ class SearchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        bindView()
     }
 }
 
 extension SearchViewController {
+    
     func bindView() {
         userField.rx.text.orEmpty
             .map(viewModel.checkUserNameisValid)
@@ -38,6 +40,7 @@ extension SearchViewController {
                 self.goSearchResult()
             }
             .disposed(by: disposeBag)
+        
     }
     
     func goSearchResult() {

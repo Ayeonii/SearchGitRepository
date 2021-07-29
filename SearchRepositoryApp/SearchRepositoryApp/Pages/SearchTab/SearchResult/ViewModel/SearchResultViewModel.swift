@@ -13,11 +13,9 @@ import RxDataSources
 class SearchResultViewModel {
     private var disposeBag = DisposeBag()
     var dataSource = SearchResultDataSource.dataSource()
-    var resultSubject = BehaviorRelay<[SearchResultSectionModel]>(value: [])
-    var cellModels : [SearchResultSectionModel] = []
+    var resultRelay = BehaviorRelay<[SearchResultSectionModel]>(value: [])
     var isEndPaging = false
     var searchInfo : SearchRequestInfo
-    
     
     private var pagingCount = 0
     private var perPageSize = 15
@@ -45,12 +43,11 @@ extension SearchResultViewModel {
                     self?.emitEvent(data)
                 })
                 .disposed(by: disposeBag)
-        
     }
     
     func emitEvent(_ res : SearchResultCodable) {
         guard let items = res.items else {return}
-        var newSection = resultSubject.value
+        var newSection = resultRelay.value
         
         if items.count < perPageSize {
             isEndPaging = true
@@ -61,7 +58,7 @@ extension SearchResultViewModel {
         }
         
         newSection += [SearchResultSectionModel(items : list)]
-        self.resultSubject.accept(newSection)
+        self.resultRelay.accept(newSection)
 
     }
 }

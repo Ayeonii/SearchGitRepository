@@ -10,7 +10,7 @@ import RxSwift
 
 class CallApi {
     
-    open class func callSearchApi(request : SearchRequestInfo) -> Observable<SearchResultCodable> {
+     class func callSearchApi(request : SearchRequestInfo) -> Observable<SearchResultCodable> {
         
         return Observable.create{ observer -> Disposable in
             

@@ -45,16 +45,15 @@ extension SearchResultViewController {
         tableView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
-        viewModel.resultSubject
+        viewModel.resultRelay
             .do(onNext: {[weak self] _ in
                 
                 self?.isFetching = false
             })
             .bind(to:
-                tableView.rx.items(dataSource: self.viewModel.dataSource)
+                    tableView.rx.items(dataSource: self.viewModel.dataSource)
             )
             .disposed(by: disposeBag)
-        
         
         tableView.rx.modelSelected(SearchResultModel.self)
             .subscribe(onNext: { model in
@@ -63,25 +62,30 @@ extension SearchResultViewController {
                 }
             })
             .disposed(by: disposeBag)
+        
+        tableView.rx.contentOffset
+            .map { $0.y }
+            .bind(onNext: { [weak self] in
+                guard let self = self else {return}
+                
+                let contentHeight = self.tableView.contentSize.height
+                if $0 >= contentHeight - (self.tableView.frame.height){
+                    if !self.viewModel.isEndPaging, !self.isFetching {
+                        self.isFetching = true
+                        self.viewModel.callSearchResultApi(self.viewModel.searchInfo)
+                    }
+                }
+            })
+            .disposed(by: disposeBag)
+        
     }
 }
 
 extension SearchResultViewController : UITableViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        
-        let contentHeight = scrollView.contentSize.height
-        if offsetY >= contentHeight - (scrollView.frame.height){
-            if !viewModel.isEndPaging, !isFetching {
-                isFetching = true
-                viewModel.callSearchResultApi(viewModel.searchInfo)
-            }
-        }
-    }
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
-
+    
 }
 

@@ -16,8 +16,7 @@ public class HttpAPIManager: NSObject {
         return jsonDecoder
     }
     
-    public class func call<T, E>(api: String, method: Alamofire.HTTPMethod, encodable: E, headers: HTTPHeaders, responseClass:T.Type, completion: @escaping (_ result: T?, _ error: NSError?) -> Void) where T: Decodable , E: Encodable {
-        
+    public class func call<T, E>(api: String, method: Alamofire.HTTPMethod, encodable: E, headers: HTTPHeaders, responseClass:T.Type, completion: @escaping (_ result: T?, _ error: NSError?) -> Void) where T: Decodable, E: Encodable {
         
         let encoder = JSONEncoder()
         do {
@@ -32,12 +31,9 @@ public class HttpAPIManager: NSObject {
             debugPrint("\(error)")
             completion(nil, error as NSError)
         }
-        
-        
     }
     
     public class func call<T>(api: String, method: Alamofire.HTTPMethod, parameters:[String: Any]? = nil, headers:HTTPHeaders, responseClass:T.Type, completion: @escaping (_ result: T?, _ error: NSError?) -> Void) where T: Decodable {
-        
         
         let urlString: String = api
         let method = method
@@ -69,7 +65,6 @@ public class HttpAPIManager: NSObject {
             let url = URL(string: urlString)!
             var urlRequest = try! URLRequest(url: url, method: method, headers: headers)
             
-            
             let data = try! JSONSerialization.data(withJSONObject: params, options: JSONSerialization.WritingOptions.prettyPrinted)
             
             let json = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
@@ -83,37 +78,34 @@ public class HttpAPIManager: NSObject {
         request.responseData { (responseData) in
             DispatchQueue.global().async {
                 
-                guard let response = responseData.response else {
-                    DispatchQueue.main.async {
-                        completion(nil, responseData.error as NSError?)
+                switch responseData.result {
+                case .success(let data) :
+                    guard let statusCode = responseData.response?.statusCode else {
+                        return
                     }
-                    return
-                }
-                
-                guard responseData.error == nil else {
-                    DispatchQueue.main.async {
-                        completion(nil, responseData.error as NSError?)
-                    }
-                    return
-                }
-                
-                let jsonDecoder = HttpAPIManager.jsonDecoder
-                
-                if response.statusCode > 199 && response.statusCode < 300 {
-                    do {
-                        let result = try jsonDecoder.decode(responseClass, from: responseData.data!)
-                        
-                        DispatchQueue.main.async {
-                            completion(result, nil)
+                    
+                    if statusCode > 199 && statusCode < 300 {
+                        do {
+                            let result = try jsonDecoder.decode(responseClass, from: data)
+                            
+                            DispatchQueue.main.async {
+                                completion(result, nil)
+                            }
+                        } catch {
+                            DispatchQueue.main.async {
+                                completion(nil, error as NSError?)
+                            }
                         }
-                    } catch {
+                    } else {
                         DispatchQueue.main.async {
-                            completion(nil, error as NSError?)
+                            completion(nil, NSError(domain: "iOS", code: statusCode, userInfo: nil))
                         }
+                        return
                     }
-                } else {
+                    
+                case .failure(let error) :
                     DispatchQueue.main.async {
-                        completion(nil, NSError(domain: "iOS", code: response.statusCode, userInfo: nil))
+                        completion(nil, error as NSError)
                     }
                 }
             }

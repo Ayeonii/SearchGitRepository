@@ -10,7 +10,7 @@ import Alamofire
 
 struct HttpApiHeader {
     
-    public static func headers() -> HTTPHeaders {
+    static func headers() -> HTTPHeaders {
         let headers : HTTPHeaders = ["Accept": "application/vnd.github.v3+json"]
         return headers
     }

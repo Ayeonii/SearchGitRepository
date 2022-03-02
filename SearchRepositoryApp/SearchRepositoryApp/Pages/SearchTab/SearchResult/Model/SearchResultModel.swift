@@ -77,15 +77,12 @@ struct SearchResultDataSource {
     typealias DataSource = RxTableViewSectionedAnimatedDataSource
     
     static func dataSource() -> DataSource<SearchResultSectionModel> {
-        return .init(animationConfiguration: AnimationConfiguration(insertAnimation: .none, reloadAnimation: .none, deleteAnimation: .none),
+        return .init(animationConfiguration: AnimationConfiguration(insertAnimation: .fade, reloadAnimation: .fade, deleteAnimation: .left),
                      configureCell: { dataSource, tableView, indexPath, sectionItem -> UITableViewCell in
-                        
-                        if let cell = tableView.dequeueReusableCell(withIdentifier: "SearchResultTableViewCell", for: indexPath) as? SearchResultTableViewCell {
-                            cell.cellModel = sectionItem
-                        }
-                        return UITableViewCell()
-                     })
-        
-        
+            
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "SearchResultTableViewCell", for: indexPath) as? SearchResultTableViewCell else { return UITableViewCell() }
+            cell.cellModel = sectionItem
+            return cell
+        })
     }
 }

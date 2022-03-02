@@ -9,56 +9,98 @@ import Foundation
 import RxSwift
 import RxCocoa
 import RxDataSources
+import ReactorKit
 
-class SearchResultViewModel {
+class SearchResultViewModel : Reactor {
     private var disposeBag = DisposeBag()
+  
     var dataSource = SearchResultDataSource.dataSource()
-    var resultRelay = BehaviorRelay<[SearchResultSectionModel]>(value: [])
-    var isEndPaging = false
     var searchInfo : SearchRequestInfo
     
     private var pagingCount = 0
     private var perPageSize = 15
     
+    enum Action {
+        case callSearchList
+    }
+    
+    enum Mutation {
+        case setSearchList([SearchResultSectionModel])
+        case setLoading(Bool)
+    }
+    
+    struct State {
+        var resultList : [SearchResultSectionModel] = []
+        var isLoading : Bool = false
+    }
+    
+    var initialState = State()
+    
     init(_ info : SearchRequestInfo){
         searchInfo = info
-        callSearchResultApi(info)
-        dataSource.decideViewTransition = { (_, _, _)  in return RxDataSources.ViewTransition.reload }
+        dataSource.decideViewTransition = { (_, _, _)  in return RxDataSources.ViewTransition.animated }
+    }
+    
+    func mutate(action : SearchResultViewModel.Action) -> Observable<SearchResultViewModel.Mutation> {
+        switch action {
+        case .callSearchList :
+            return Observable.concat([Observable.just(.setLoading(true)),
+                                      callSearchResultApi(searchInfo),
+                                      Observable.just(.setLoading(false))])
+        }
+    }
+    
+    func reduce(state : State, mutation : Mutation) -> State {
+        var state = state
+        
+        switch mutation {
+        case .setSearchList(let resultModel) :
+            state.resultList = resultModel
+        case .setLoading(let isLoading) :
+            state.isLoading = isLoading
+        }
+        
+        return state
     }
 }
 
 extension SearchResultViewModel {
-    func callSearchResultApi(_ info : SearchRequestInfo, perPage : Int? = 15){
-        
-            pagingCount += 1
-            perPageSize = perPage ?? perPageSize
+    func callSearchResultApi(_ info : SearchRequestInfo, perPage : Int? = 15) -> Observable<Mutation> {
+        return Observable<Mutation>.create {[weak self] observer in
+            guard let self = self else {
+                observer.onError(NSError(domain: "SELF Deinit!", code: -1, userInfo: nil))
+                return Disposables.create()
+            }
+            
+            self.pagingCount += 1
+            self.perPageSize = perPage ?? self.perPageSize
             
             var requestInfo = info
-            requestInfo.page = "\(pagingCount)"
-            requestInfo.perPage = "\(perPageSize)"
+            requestInfo.page = "\(self.pagingCount)"
+            requestInfo.perPage = "\(self.perPageSize)"
             
             CallApi.callSearchApi(request: requestInfo)
                 .debug()
                 .subscribe(onNext: { [weak self] data in
-                    self?.emitEvent(data)
+                    guard let self = self else { return }
+                    guard let items = data.items else { return }
+                    var newSection = self.currentState.resultList
+                    
+                    guard !items.isEmpty else { return }
+                    
+                    let list = items.compactMap {
+                        SearchResultModel($0)
+                    }
+                    
+                    newSection += [SearchResultSectionModel(items : list)]
+                    
+                    observer.onNext(.setSearchList(newSection))
+                    observer.onCompleted()
                 })
-                .disposed(by: disposeBag)
-    }
-    
-    func emitEvent(_ res : SearchResultCodable) {
-        guard let items = res.items else {return}
-        var newSection = resultRelay.value
-        
-        if items.count < perPageSize {
-            isEndPaging = true
+                .disposed(by: self.disposeBag)
+            
+            
+            return Disposables.create()
         }
-        
-        let list = items.compactMap {
-            SearchResultModel($0)
-        }
-        
-        newSection += [SearchResultSectionModel(items : list)]
-        self.resultRelay.accept(newSection)
-
     }
 }

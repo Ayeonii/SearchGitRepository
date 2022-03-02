@@ -23,5 +23,6 @@ class SearchResultTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        self.selectionStyle = .none
     }
 }

@@ -9,22 +9,23 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxDataSources
+import ReactorKit
 
 class SearchResultViewController: UIViewController {
+    private var disposeBag = DisposeBag()
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
+    
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.estimatedRowHeight = 50
-            tableView.scrollsToTop = false
             tableView.register(UINib(nibName: "SearchResultTableViewCell", bundle: nil), forCellReuseIdentifier: "SearchResultTableViewCell")
         }
     }
     
-    let viewModel : SearchResultViewModel
-    var isFetching = false
-    private var disposeBag = DisposeBag()
+    let reactor : SearchResultViewModel
     
     init(info : SearchRequestInfo) {
-        self.viewModel = SearchResultViewModel(info)
+        self.reactor = SearchResultViewModel(info)
         super.init(nibName: "SearchResultViewController", bundle: nil)
     }
     
@@ -34,25 +35,24 @@ class SearchResultViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        bindView()
+        bind(reactor: reactor)
+        reactor.action.onNext(.callSearchList)
     }
     
-}
-
-extension SearchResultViewController {
-    private func bindView() {
-        
+    func bind(reactor : SearchResultViewModel) {
         tableView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
-        viewModel.resultRelay
-            .do(onNext: {[weak self] _ in
-                
-                self?.isFetching = false
+        reactor.state
+            .map{$0.resultList}
+            .bind(to: tableView.rx.items(dataSource: reactor.dataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map{$0.isLoading}
+            .subscribe(onNext: {[weak self] isLoading in
+                self?.showIndicator(isShow: isLoading)
             })
-            .bind(to:
-                    tableView.rx.items(dataSource: self.viewModel.dataSource)
-            )
             .disposed(by: disposeBag)
         
         tableView.rx.modelSelected(SearchResultModel.self)
@@ -63,29 +63,40 @@ extension SearchResultViewController {
             })
             .disposed(by: disposeBag)
         
-        tableView.rx.contentOffset
-            .map { $0.y }
-            .bind(onNext: { [weak self] in
-                guard let self = self else {return}
+        tableView.rx
+            .willDisplayCell
+            .filter {[weak self, weak reactor] ( _ , indexPath) in
+                guard let self = self else { return false }
                 
-                let contentHeight = self.tableView.contentSize.height
-                if $0 >= contentHeight - (self.tableView.frame.height){
-                    if !self.viewModel.isEndPaging, !self.isFetching {
-                        self.isFetching = true
-                        self.viewModel.callSearchResultApi(self.viewModel.searchInfo)
-                    }
-                }
+                let translation = self.tableView.panGestureRecognizer.translation(in: self.tableView.superview)
+                let maxCount = reactor?.currentState.resultList[indexPath.section].items.count ?? 0
+                let isLoading = reactor?.currentState.isLoading ?? false
+                
+                return translation.y < 0 && (indexPath.row >= maxCount - 4 && maxCount > 4) && !isLoading
+            }
+            .throttle(.milliseconds(500), latest: false, scheduler: MainScheduler.instance)
+            .subscribe(onNext: {[weak reactor] _ in
+                reactor?.action.onNext(.callSearchList)
             })
             .disposed(by: disposeBag)
         
     }
+    
+    func showIndicator(isShow : Bool) {
+        self.indicator.isHidden = !isShow
+        
+        if isShow {
+            self.indicator.startAnimating()
+        } else {
+            self.indicator.stopAnimating()
+        }
+    }
+    
 }
 
 extension SearchResultViewController : UITableViewDelegate {
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
-    
 }
 

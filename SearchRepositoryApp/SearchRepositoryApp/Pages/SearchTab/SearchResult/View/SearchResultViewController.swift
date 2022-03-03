@@ -22,10 +22,10 @@ class SearchResultViewController: UIViewController {
         }
     }
     
-    let reactor : SearchResultViewModel
+    let reactor : SearchResultReactor
     
     init(info : SearchRequestInfo) {
-        self.reactor = SearchResultViewModel(info)
+        self.reactor = SearchResultReactor(info)
         super.init(nibName: "SearchResultViewController", bundle: nil)
     }
     
@@ -39,7 +39,7 @@ class SearchResultViewController: UIViewController {
         reactor.action.onNext(.callSearchList)
     }
     
-    func bind(reactor : SearchResultViewModel) {
+    func bind(reactor : SearchResultReactor) {
         tableView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         

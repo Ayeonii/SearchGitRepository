@@ -11,7 +11,7 @@ import RxCocoa
 import RxDataSources
 import ReactorKit
 
-class SearchResultViewModel : Reactor {
+class SearchResultReactor : Reactor {
     private var disposeBag = DisposeBag()
   
     var dataSource = SearchResultDataSource.dataSource()
@@ -41,7 +41,7 @@ class SearchResultViewModel : Reactor {
         dataSource.decideViewTransition = { (_, _, _)  in return RxDataSources.ViewTransition.animated }
     }
     
-    func mutate(action : SearchResultViewModel.Action) -> Observable<SearchResultViewModel.Mutation> {
+    func mutate(action : SearchResultReactor.Action) -> Observable<SearchResultReactor.Mutation> {
         switch action {
         case .callSearchList :
             return Observable.concat([Observable.just(.setLoading(true)),
@@ -64,7 +64,7 @@ class SearchResultViewModel : Reactor {
     }
 }
 
-extension SearchResultViewModel {
+extension SearchResultReactor {
     func callSearchResultApi(_ info : SearchRequestInfo, perPage : Int? = 15) -> Observable<Mutation> {
         return Observable<Mutation>.create {[weak self] observer in
             guard let self = self else {
